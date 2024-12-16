@@ -1,6 +1,9 @@
 langchain_community
 langchain_huggingface
-sentence_transformers
-torch
+langchain_mistralai
+mistralai
 faiss-cpu
 streamlit
+requests
+pandas
+time
