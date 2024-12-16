@@ -187,7 +187,7 @@ def handle_style_and_responses(user_question: str, mistral_llm) -> None:
                 )
             else:  # Messaggi del chatbot
                 st.markdown(
-                    f"<p style='text-align: left;'><b>Chatbot</b></p>"
+                    f"<p style='text-align: left;'><b>AI Assistente</b></p>"
                     f"<p style='text-align: left; {chatbot_style}'><i>{message.content}</i></p>",
                     unsafe_allow_html=True,
                 )
@@ -232,7 +232,7 @@ def main():
 
     # Configura la pagina Streamlit prima di qualsiasi altro comando
     st.set_page_config(
-        page_title="Documentation Chatbot",
+        page_title="GNA Assistente AI",
         page_icon=":books:",
     )
 
