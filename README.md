@@ -1,2 +1,2 @@
 # chatw-GNA
-Initial draft for GNA RAG system
+Draft prototype for GNA RAG system

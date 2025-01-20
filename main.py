@@ -22,22 +22,28 @@ import streamlit as st
 import time
 import requests
 
+# Funzione per caricare il dataset
 def load_dataset(dataset_name: str = "gna_kg_dataset.csv") -> pd.DataFrame:
     """Carica un dataset da file CSV e verifica la presenza delle colonne necessarie."""
     data_dir = "./data"
     file_path = os.path.join(data_dir, dataset_name)
+
     
     try:
-        df = pd.read_csv(file_path)
-        print(f"Dataset caricato con successo. Numero di righe: {len(df)}")
+        # Verifica se il file esiste prima di caricarlo
+        if not os.path.exists(file_path):
+            print(f"Errore: Il file {file_path} non esiste.")
+            return None
+        
+        df = pd.read_csv(file_path, encoding='utf-8')
         
         # Verifica che le colonne richieste siano presenti
         required_columns = ['body', 'title', 'description', 'url']
         missing_columns = [col for col in required_columns if col not in df.columns]
+        
         if missing_columns:
             print(f"Attenzione: Colonne mancanti nel dataset: {', '.join(missing_columns)}")
-        
-        print(f"Prime righe del dataset:\n{df.head()}")
+
         return df
     except Exception as e:
         print(f"Errore nel caricamento del dataset: {e}")
@@ -45,36 +51,41 @@ def load_dataset(dataset_name: str = "gna_kg_dataset.csv") -> pd.DataFrame:
 
 def create_chunks(dataset: pd.DataFrame, chunk_size: int, chunk_overlap: int):
     """Crea chunk informativi dal dataset per l'archiviazione e il recupero."""
-    print("Creazione dei chunk in corso...")
     
-    # Carica i dati dal dataframe
-    text_chunks = DataFrameLoader(dataset, page_content_column="body").load_and_split(
+    # Verifica se la colonna 'body' esiste nel dataset
+    if 'body' not in dataset.columns:
+        print("Errore: la colonna 'body' non è presente nel dataset.")
+        return []
+
+    # Carica e suddividi il dataset
+    text_chunks = DataFrameLoader(
+        dataset, page_content_column="body"
+    ).load_and_split(
         text_splitter=RecursiveCharacterTextSplitter(
             chunk_size=chunk_size, chunk_overlap=chunk_overlap, length_function=len
         )
     )
 
-    print(f"Numero di chunk generati: {len(text_chunks)}")
-
+    # Controllo per evitare che il dataset sia vuoto o contenga pochi chunk
+    if len(text_chunks) == 0:
+        print("Avviso: Nessun chunk è stato generato.")
+    
     formatted_chunks = []
     for i, doc in enumerate(text_chunks):
+        # Estrai i metadati del chunk
         title = doc.metadata.get("title", "No Title")
         description = doc.metadata.get("description", "No Description")
         content = doc.page_content[:100] + "..."  # Troncamento per evitare output troppo lungo
         url = doc.metadata.get("url", "No URL")
 
         # Formatta il contenuto del chunk
-        final_content = f"TITLE: {title}\nDESCRIPTION: {description}\nBODY: {doc.page_content}\nURL: {url}"
-        doc.page_content = final_content
-        formatted_chunks.append(doc)
-
-        # Debug: visualizzare il primo chunk
-        if i == 0:
-            print(f"\nChunk {i + 1}:")
-            print(f"Title: {title}")
-            print(f"Description: {description}")
-            print(f"Content: {content}")
-            print(f"URL: {url}")
+        final_content = f"TITLE: {title}\nDESCRIPTION: {description}\nBODY: {doc.page_content}\n"
+        if 'subtitles' in doc.metadata:
+            final_content += f"SUBTITLES: {doc.metadata['subtitles']}\n"
+        if 'sections' in doc.metadata:
+            final_content += f"SECTIONS: {doc.metadata['sections']}\n"
+        if 'plain_text' in doc.metadata:
+            final_content += f"PLAIN_TEXT: {doc.metadata['plain_text']}\n"
 
     return formatted_chunks
 
@@ -96,22 +107,37 @@ def create_or_get_vector_store(chunks: list, api_key: str) -> FAISS:
     # Verifica se il vector store esiste
     if not os.path.exists("./db"):
         os.makedirs("./db")
+        print("Cartella ./db creata.")
 
-    if not os.path.exists("./db/faiss.index_gna"):
+    # Verifica se il vector store esiste
+    vector_store_path = "./db/index.faiss"
+    if not os.path.exists(vector_store_path):
         print("Vector store non trovato. Creazione di un nuovo vector store...")
-        document_texts = [doc.page_content for doc in chunks]
+
+        # Log dei chunk
+        document_texts = [doc.page_content for doc in chunks if doc.page_content and len(doc.page_content.strip()) > 0]
+        if not document_texts:
+            raise ValueError("La lista 'document_texts' è vuota o contiene solo testo vuoto.")
+
+        # Debugging: verifica i primi documenti
+        print(f"Primi 5 documenti: {document_texts[:5]}")
+
+        # Creazione degli embeddings
+        embeddings = mistral_embeddings.embed_documents(document_texts)
+        if not embeddings or any(len(embedding) == 0 for embedding in embeddings):
+            raise ValueError("Gli embeddings risultano vuoti o malformati.")
+
+        # Creazione del vector store
         vector_store = FAISS.from_texts(document_texts, mistral_embeddings)
         vector_store.save_local("./db")
-        print("Vector store creato e salvato in ./db.")
+        print(f"Vector store creato e salvato in {vector_store_path}.")
     else:
-        print("Vector store trovato. Caricamento in corso...")
-        vector_store = FAISS.load_local("./db", embeddings=mistral_embeddings)
-
-    num_documents = len(vector_store.docstore._dict)
-    print(f"Numero di documenti nel vector store: {num_documents}")
+        print(f"Vector store trovato in {vector_store_path}. Caricamento in corso...")
+        vector_store = FAISS.load_local("./db", embeddings=mistral_embeddings, allow_dangerous_deserialization=True)
 
     return vector_store
 
+    
 def create_mistral_llm(api_key: str, model_name: str = "open-mistral-nemo"):
     """Crea un LLM Mistral per la generazione di testo."""
     print(f"Inizializzazione del modello Mistral: {model_name}")
@@ -127,7 +153,6 @@ def get_conversation_chain(vector_store, api_key: str, model_name: str):
     """
     Ottiene la conversation chain utilizzando Mistral.
     """
-    print("Creazione della conversation chain...")
     llm = create_mistral_llm(api_key, model_name)
     
     # Configuriamo la memoria per la conversazione
@@ -147,19 +172,36 @@ def invoke_with_retry(conversation_chain, test_message, retries=5, delay=10):
     """
     for attempt in range(retries):
         try:
-            print(f"Invocazione API tentativo {attempt + 1}...")
+            print(f"Tentativo {attempt + 1} di invocazione API...")
+            
+            # Invocazione della conversation chain
             response = conversation_chain.invoke({"question": test_message})
+            
+            # Stampa la risposta ricevuta
             print(f"Risposta ricevuta: {response}")
             return response
+
         except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
-                print("Errore 429: Limite di richieste superato. Riprovo...")
-                time.sleep(delay)  # Pausa di 5 secondi prima di riprovare
+            # Gestione specifica degli errori HTTP
+            if e.response and e.response.status_code == 429:
+                print("Errore 429: Limite di richieste superato. Attendo prima di riprovare...")
+                time.sleep(delay)
             else:
                 print(f"Errore HTTP non previsto: {e}")
-                raise e  # Altri errori non gestiti
-    print("Numero massimo di tentativi superato.")
-    raise Exception("Numero massimo di tentativi superato.")
+                raise e  # Rilancia errori non gestiti
+
+        except Exception as e:
+            # Gestione generale degli errori
+            print(f"Errore durante l'invocazione: {e}")
+            if attempt < retries - 1:
+                print(f"Riprovo tra {delay} secondi...")
+                time.sleep(delay)
+            else:
+                print("Numero massimo di tentativi raggiunto. Operazione fallita.")
+                raise e  # Rilancia l'errore dopo il massimo numero di tentativi
+
+    # Messaggio finale se i tentativi sono stati esauriti
+    raise Exception("Numero massimo di tentativi superato senza successo.")
 
 def handle_style_and_responses(user_question: str, mistral_llm) -> None:
     """
@@ -205,62 +247,35 @@ def handle_style_and_responses(user_question: str, mistral_llm) -> None:
         st.error(f"Si è verificato un errore: {str(e)}")
         print(f"Errore nella gestione della risposta: {e}")  # Debug dell'errore
 
-# if __name__ == "__main__":
-#     load_dotenv()
-
-#     api_key = os.getenv("MISTRAL_API_KEY")
-#     model_name = os.getenv("MODEL", "open-mistral-nemo")
-#     if not api_key:
-#         print("Errore: MISTRAL_API_KEY non trovata.")
-#         exit()
-
-#     dataset_name = "gna_kg_dataset.csv"
-#     dataset = load_dataset(dataset_name)
-#     chunks = create_chunks(dataset, chunk_size=1000, chunk_overlap=100)
-#     vector_store = create_or_get_vector_store(chunks, api_key)
-
-#     conversation_chain = get_conversation_chain(vector_store, api_key, model_name)
-
-#     test_message = "Qual è il contenuto principale di questo dataset?"
-#     try:
-#         response = invoke_with_retry(conversation_chain, test_message)
-#         if 'answer' in response:
-#             print(f"Risposta dalla conversation chain: {response['answer']}")
-#         else:
-#             print("Campo 'answer' non trovato nella risposta.")
-#     except Exception as e:
-#         print(f"Errore durante la conversazione: {e}")
-
-def main(): 
+def main():
     # Carica le variabili di ambiente
     load_dotenv()
     api_key = os.getenv("MISTRAL_API_KEY")
     if not api_key:
         st.error("Errore: MISTRAL_API_KEY non trovata. Verifica il file .env.")
         return
-
+    
     # Configura la pagina Streamlit prima di qualsiasi altro comando
     st.set_page_config(
         page_title="GNA Assistente AI",
-        page_icon=":books:",
+        page_icon=":bust_in_silhouette:",
     )
-
+    
     # Crea il modello Mistral LLM
     try:
         mistral_llm = create_mistral_llm(api_key)
-        st.write("Modello Mistral LLM configurato correttamente!")
     except ValueError as e:
         st.error(str(e))
         return
-
+    
     # Carica dataset e chunks
     dataset = load_dataset("gna_kg_dataset.csv")
     chunks = create_chunks(dataset, chunk_size=1000, chunk_overlap=0)
-
+    
     # Configura Vector Store
     if "vector_store" not in st.session_state:
         st.session_state.vector_store = create_or_get_vector_store(chunks, api_key)
-
+    
     # Configura Conversation Chain
     if "conversation" not in st.session_state:
         model_name = "open-mistral-nemo"  # Imposta il nome del modello (es. 'mistral-7b')
@@ -273,16 +288,14 @@ def main():
         st.session_state.chat_history = []
 
     # UI
-    st.title("Documentation Chatbot")
-    st.subheader("Chatbot per la documentazione del progetto LangChain")
+    st.title("Assistente GNA")
+    st.subheader("Assistente AI per il progetto GNA")
     st.markdown(
         """
-        Questo chatbot è stato creato per rispondere a domande sulla documentazione del progetto LangChain.
-        Poni una domanda e il chatbot ti risponderà con la pagina più rilevante della documentazione.
+        Questo assistente è stato creato per rispondere a domande sul manuale d'uso dell'applicativo GIS per il progetto Geoportale Nazionale dell’Archeologia (GNA).
+        Poni una domanda e l'assistente ti risponderà con la pagina più rilevante della manuale.
         """
     )
-    #st.image("https://aunoa.ai/wp-content/uploads/2024/05/tipos-de-chatbots.webp", caption="Chatbot Assistance")
-    # st.image("https://images.unsplash.com/photo-1485827404703-89b55fcc595e", caption="Chatbot Assistance") # immagine precedente
 
     # Immagine
     st.markdown(
@@ -307,6 +320,7 @@ def main():
     if user_question:
         with st.spinner("Elaborando risposta..."):
             handle_style_and_responses(user_question, mistral_llm)
+
 
 if __name__ == "__main__":
     main()
