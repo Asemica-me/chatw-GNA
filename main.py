@@ -16,48 +16,64 @@ from langchain.prompts import (
     HumanMessagePromptTemplate,
     SystemMessagePromptTemplate,
 )
-
+from langchain_core.rate_limiters import InMemoryRateLimiter
 import streamlit as st
 
 import time
 import requests
 
-# Funzione per caricare il dataset
-def load_dataset(dataset_name: str = "gna_kg_dataset.csv") -> pd.DataFrame:
-    """Carica un dataset da file CSV e verifica la presenza delle colonne necessarie."""
+def load_dataset(dataset_name: str = "gna_kg_dataset_new.csv") -> pd.DataFrame:
+    """Carica un dataset da file CSV."""
     data_dir = "./data"
     file_path = os.path.join(data_dir, dataset_name)
-
-    
     try:
-        # Verifica se il file esiste prima di caricarlo
-        if not os.path.exists(file_path):
-            print(f"Errore: Il file {file_path} non esiste.")
-            return None
-        
-        df = pd.read_csv(file_path, encoding='utf-8')
-        
-        # Verifica che le colonne richieste siano presenti
-        required_columns = ['body', 'title', 'description', 'url']
-        missing_columns = [col for col in required_columns if col not in df.columns]
-        
-        if missing_columns:
-            print(f"Attenzione: Colonne mancanti nel dataset: {', '.join(missing_columns)}")
-
+        df = pd.read_csv(file_path)
+        print(f"Dataset caricato con successo. Numero di righe: {len(df)}")
+        print(f"Prime righe del dataset:\n{df.head()}")  # Aggiungi per vedere le prime righe
         return df
     except Exception as e:
         print(f"Errore nel caricamento del dataset: {e}")
         raise
 
+# def create_chunks(dataset: pd.DataFrame, chunk_size: int, chunk_overlap: int):
+#     """Crea chunk informativi dal dataset per l'archiviazione e il recupero."""
+#     print("Creazione dei chunk in corso...")
+#     text_chunks = DataFrameLoader(
+#         dataset, page_content_column="body"
+#     ).load_and_split(
+#         text_splitter=RecursiveCharacterTextSplitter(
+#             chunk_size=chunk_size, chunk_overlap=chunk_overlap, length_function=len
+#         )
+#     )
+
+#     print(f"Numero di chunk generati: {len(text_chunks)}")
+
+#     formatted_chunks = []
+#     for i, doc in enumerate(text_chunks):
+#         title = doc.metadata.get("title", "No Title")
+#         description = doc.metadata.get("description", "No Description")
+#         content = doc.page_content[:100] + "..."  # Troncamento per evitare output troppo lungo
+#         url = doc.metadata.get("url", "No URL")
+
+#         final_content = f"TITLE: {title}\nDESCRIPTION: {description}\nBODY: {doc.page_content}\nURL: {url}"
+#         doc.page_content = final_content
+#         formatted_chunks.append(doc)
+
+#         # Debug: visualizzare il primo chunk
+#         if i == 0:
+#             print(f"\nChunk {i + 1}:")
+#             print(f"Title: {title}")
+#             print(f"Description: {description}")
+#             print(f"Content: {content}")
+#             print(f"URL: {url}")
+
+#         formatted_chunks.append(doc.model_copy(update={"page_content": final_content}))
+
+#     return text_chunks
+
 def create_chunks(dataset: pd.DataFrame, chunk_size: int, chunk_overlap: int):
     """Crea chunk informativi dal dataset per l'archiviazione e il recupero."""
-    
-    # Verifica se la colonna 'body' esiste nel dataset
-    if 'body' not in dataset.columns:
-        print("Errore: la colonna 'body' non è presente nel dataset.")
-        return []
-
-    # Carica e suddividi il dataset
+    print("Creazione dei chunk in corso...")
     text_chunks = DataFrameLoader(
         dataset, page_content_column="body"
     ).load_and_split(
@@ -66,26 +82,26 @@ def create_chunks(dataset: pd.DataFrame, chunk_size: int, chunk_overlap: int):
         )
     )
 
-    # Controllo per evitare che il dataset sia vuoto o contenga pochi chunk
-    if len(text_chunks) == 0:
-        print("Avviso: Nessun chunk è stato generato.")
-    
+    print(f"Numero di chunk generati: {len(text_chunks)}")
+
     formatted_chunks = []
     for i, doc in enumerate(text_chunks):
-        # Estrai i metadati del chunk
         title = doc.metadata.get("title", "No Title")
         description = doc.metadata.get("description", "No Description")
         content = doc.page_content[:100] + "..."  # Troncamento per evitare output troppo lungo
         url = doc.metadata.get("url", "No URL")
 
-        # Formatta il contenuto del chunk
-        final_content = f"TITLE: {title}\nDESCRIPTION: {description}\nBODY: {doc.page_content}\n"
-        if 'subtitles' in doc.metadata:
-            final_content += f"SUBTITLES: {doc.metadata['subtitles']}\n"
-        if 'sections' in doc.metadata:
-            final_content += f"SECTIONS: {doc.metadata['sections']}\n"
-        if 'plain_text' in doc.metadata:
-            final_content += f"PLAIN_TEXT: {doc.metadata['plain_text']}\n"
+        final_content = f"TITLE: {title}\nDESCRIPTION: {description}\nBODY: {doc.page_content}\nURL: {url}"
+        doc.page_content = final_content
+        formatted_chunks.append(doc)
+
+        # Debug: visualizzare il primo chunk
+        if i == 0:
+            print(f"\nChunk {i + 1}:")
+            print(f"Title: {title}")
+            print(f"Description: {description}")
+            print(f"Content: {content}")
+            print(f"URL: {url}")
 
     return formatted_chunks
 
@@ -102,7 +118,7 @@ def create_or_get_vector_store(chunks: list, api_key: str) -> FAISS:
         print("Attenzione: il token HuggingFace non è stato trovato. Potrebbero verificarsi limitazioni.")
 
     # Inizializza gli embeddings di Mistral
-    mistral_embeddings = MistralAIEmbeddings(api_key=api_key)
+    mistral_embeddings = MistralAIEmbeddings(api_key=api_key, wait_time=1) #wait_time attesa per la creazione degli embeddings di mistral
 
     # Verifica se il vector store esiste
     if not os.path.exists("./db"):
@@ -110,7 +126,7 @@ def create_or_get_vector_store(chunks: list, api_key: str) -> FAISS:
         print("Cartella ./db creata.")
 
     # Verifica se il vector store esiste
-    vector_store_path = "./db/index.faiss"
+    vector_store_path = "./db/index_gna.faiss"
     if not os.path.exists(vector_store_path):
         print("Vector store non trovato. Creazione di un nuovo vector store...")
 
@@ -141,10 +157,19 @@ def create_or_get_vector_store(chunks: list, api_key: str) -> FAISS:
 def create_mistral_llm(api_key: str, model_name: str = "open-mistral-nemo"):
     """Crea un LLM Mistral per la generazione di testo."""
     print(f"Inizializzazione del modello Mistral: {model_name}")
+
+    rate_limiter = InMemoryRateLimiter(
+        requests_per_second=0.2, #means 1 request every 5 seconds (0.2 = 1/2 di secondo)
+        check_every_n_seconds=0.1, #wake up every 100 ms 
+        max_bucket_size=10 #controls the maximum burst size
+    )
+
     llm = ChatMistralAI(
         model=model_name,
         temperature=0,
-        max_retries=2,
+        max_retries=2,  # Aumenta i retry
+        api_key=api_key,
+        rate_limiter=rate_limiter
     )
     print("Modello Mistral creato con successo.")
     return llm
@@ -163,45 +188,25 @@ def get_conversation_chain(vector_store, api_key: str, model_name: str):
         llm=llm,
         retriever=vector_store.as_retriever(),
         memory=memory,
+        rephrase_question=False
     )
     return conversation_chain
 
-def invoke_with_retry(conversation_chain, test_message, retries=5, delay=10):
-    """
-    Funzione per gestire il tentativo e l'errore (con retry).
-    """
-    for attempt in range(retries):
+def invoke_with_retry(conversation_chain, question, max_retries=5, initial_delay=1.0, backoff_factor=2.0):
+    """Implementa retry con backoff esponenziale"""
+    delay = initial_delay
+    for attempt in range(max_retries):
         try:
-            print(f"Tentativo {attempt + 1} di invocazione API...")
-            
-            # Invocazione della conversation chain
-            response = conversation_chain.invoke({"question": test_message})
-            
-            # Stampa la risposta ricevuta
-            print(f"Risposta ricevuta: {response}")
+            response = conversation_chain({"question": question})
             return response
-
         except requests.exceptions.HTTPError as e:
-            # Gestione specifica degli errori HTTP
-            if e.response and e.response.status_code == 429:
-                print("Errore 429: Limite di richieste superato. Attendo prima di riprovare...")
+            if e.response.status_code == 429:
+                print(f"Tentativo {attempt+1}: Rate limit raggiunto. Riprovo in {delay} secondi...")
                 time.sleep(delay)
+                delay *= backoff_factor  # Aumenta il ritardo esponenzialmente
             else:
-                print(f"Errore HTTP non previsto: {e}")
-                raise e  # Rilancia errori non gestiti
-
-        except Exception as e:
-            # Gestione generale degli errori
-            print(f"Errore durante l'invocazione: {e}")
-            if attempt < retries - 1:
-                print(f"Riprovo tra {delay} secondi...")
-                time.sleep(delay)
-            else:
-                print("Numero massimo di tentativi raggiunto. Operazione fallita.")
-                raise e  # Rilancia l'errore dopo il massimo numero di tentativi
-
-    # Messaggio finale se i tentativi sono stati esauriti
-    raise Exception("Numero massimo di tentativi superato senza successo.")
+                raise
+    raise Exception("Rate limit: massimo numero di tentativi raggiunto")
 
 def handle_style_and_responses(user_question: str, mistral_llm) -> None:
     """
@@ -210,13 +215,21 @@ def handle_style_and_responses(user_question: str, mistral_llm) -> None:
     Args:
         user_question (str): User question
     """
+    if "last_request_time" in st.session_state:
+        elapsed = time.time() - st.session_state.last_request_time
+        if elapsed < 2.0:  # 2 secondi tra le richieste
+            st.warning("Attendi almeno 2 secondi tra una richiesta e l'altra")
+            return
+
     try:
+
+
         # Verifica e inizializzazione della chat history
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
 
         # Ottieni la risposta dal modello
-        response = st.session_state.conversation({"question": user_question})
+        response = st.session_state.conversation.invoke({"question": user_question})
         st.session_state.chat_history = response.get("chat_history", [])
 
         # Definizione degli stili
@@ -268,6 +281,21 @@ def main():
         st.error(str(e))
         return
     
+    system_message_prompt = SystemMessagePromptTemplate.from_template(
+        """
+        You are a chatbot tasked with responding to questions about the WikiMedia user manual of the [Geoportale Nazionale dell’Archeologia (GNA)](https://gna.cultura.gov.it/wiki/index.php/Pagina_principale).
+
+        You should never answer a question with a question, and you should always respond with the most relevant user manual page.
+
+        Do not answer questions that are not about the project.
+
+        Given a question, you should respond with the most relevant user manual page by following the relevant context below:\n
+        {context}
+        """
+    )
+
+    human_message_prompt = HumanMessagePromptTemplate.from_template("{question}")
+    
     # Carica dataset e chunks
     dataset = load_dataset("gna_kg_dataset.csv")
     chunks = create_chunks(dataset, chunk_size=1000, chunk_overlap=0)
@@ -288,12 +316,11 @@ def main():
         st.session_state.chat_history = []
 
     # UI
-    st.title("Assistente GNA")
-    st.subheader("Assistente AI per il progetto GNA")
+    st.title("Assistente AI per il progetto GNA")
     st.markdown(
         """
-        Questo assistente è stato creato per rispondere a domande sul manuale d'uso dell'applicativo GIS per il progetto Geoportale Nazionale dell’Archeologia (GNA).
-        Poni una domanda e l'assistente ti risponderà con la pagina più rilevante della manuale.
+        Questo assistente è stato creato per rispondere a domande sul manuale d'uso per il progetto [Geoportale Nazionale dell’Archeologia (GNA)](https://gna.cultura.gov.it/wiki/index.php/Pagina_principale).
+        Poni una domanda e l'assistente ti risponderà con la sezione più rilevante del manuale.
         """
     )
 
@@ -318,7 +345,7 @@ def main():
     # Input utente
     user_question = st.text_input("Cosa vuoi chiedere?")
     if user_question:
-        with st.spinner("Elaborando risposta..."):
+        with st.spinner("Elaborando la risposta..."):
             handle_style_and_responses(user_question, mistral_llm)
 
 
