@@ -29,7 +29,7 @@ def load_dataset(dataset_name: str = "gna_kg_dataset_new.csv") -> pd.DataFrame:
     try:
         df = pd.read_csv(file_path)
         print(f"Dataset caricato con successo. Numero di righe: {len(df)}")
-        print(f"Prime righe del dataset:\n{df.head()}")  # Aggiungi per vedere le prime righe
+        #print(f"Prime righe del dataset:\n{df.head()}")  # Aggiungi per vedere le prime righe
         return df
     except Exception as e:
         print(f"Errore nel caricamento del dataset: {e}")
@@ -95,19 +95,18 @@ def create_chunks(dataset: pd.DataFrame, chunk_size: int, chunk_overlap: int):
         doc.page_content = final_content
         formatted_chunks.append(doc)
 
-        # Debug: visualizzare il primo chunk
-        if i == 0:
-            print(f"\nChunk {i + 1}:")
-            print(f"Title: {title}")
-            print(f"Description: {description}")
-            print(f"Content: {content}")
-            print(f"URL: {url}")
+        # # Debug: visualizzare il primo chunk
+        # if i == 0:
+        #     print(f"\nChunk {i + 1}:")
+        #     print(f"Title: {title}")
+        #     print(f"Description: {description}")
+        #     print(f"Content: {content}")
+        #     print(f"URL: {url}")
 
     return formatted_chunks
 
 def create_or_get_vector_store(chunks: list, api_key: str) -> FAISS:
-    """Configura il token HF.
-    Crea o carica un vector store basato su FAISS."""
+    """Crea o carica un vector store basato su FAISS."""
     # Carica le variabili d'ambiente
     load_dotenv()
 
@@ -118,7 +117,7 @@ def create_or_get_vector_store(chunks: list, api_key: str) -> FAISS:
         print("Attenzione: il token HuggingFace non è stato trovato. Potrebbero verificarsi limitazioni.")
 
     # Inizializza gli embeddings di Mistral
-    mistral_embeddings = MistralAIEmbeddings(api_key=api_key, wait_time=1) #wait_time attesa per la creazione degli embeddings di mistral
+    mistral_embeddings = MistralAIEmbeddings(api_key=api_key, wait_time=3) #wait_time attesa per la creazione degli embeddings di mistral
 
     # Verifica se il vector store esiste
     if not os.path.exists("./db"):
@@ -136,7 +135,7 @@ def create_or_get_vector_store(chunks: list, api_key: str) -> FAISS:
             raise ValueError("La lista 'document_texts' è vuota o contiene solo testo vuoto.")
 
         # Debugging: verifica i primi documenti
-        print(f"Primi 5 documenti: {document_texts[:5]}")
+        #print(f"Primi 5 documenti: {document_texts[:5]}")
 
         # Creazione degli embeddings
         embeddings = mistral_embeddings.embed_documents(document_texts)
@@ -159,7 +158,7 @@ def create_mistral_llm(api_key: str, model_name: str = "open-mistral-nemo"):
     print(f"Inizializzazione del modello Mistral: {model_name}")
 
     rate_limiter = InMemoryRateLimiter(
-        requests_per_second=0.2, #means 1 request every 5 seconds (0.2 = 1/2 di secondo)
+        requests_per_second=0.1, #means 1 request every 5 seconds (0.2 = 1/2 di secondo)
         check_every_n_seconds=0.1, #wake up every 100 ms 
         max_bucket_size=10 #controls the maximum burst size
     )
@@ -174,7 +173,7 @@ def create_mistral_llm(api_key: str, model_name: str = "open-mistral-nemo"):
     print("Modello Mistral creato con successo.")
     return llm
 
-def get_conversation_chain(vector_store, api_key: str, model_name: str):
+def get_conversation_chain(vector_store, api_key: str, model_name: str, system_message:str, human_message:str):
     """
     Ottiene la conversation chain utilizzando Mistral.
     """
@@ -188,7 +187,15 @@ def get_conversation_chain(vector_store, api_key: str, model_name: str):
         llm=llm,
         retriever=vector_store.as_retriever(),
         memory=memory,
-        rephrase_question=False
+        rephrase_question=False,
+        combine_docs_chain_kwargs={
+            "prompt": ChatPromptTemplate.from_messages(
+                [
+                    system_message,
+                    human_message,
+                ]
+            ),
+        },
     )
     return conversation_chain
 
@@ -245,13 +252,13 @@ def handle_style_and_responses(user_question: str, mistral_llm) -> None:
 
             if i % 2 == 0:  # Messaggi dell'utente
                 st.markdown(
-                    f"<p style='text-align: right;'><b>Utente</b></p>"
+                    f"<p style='text-align: right;'><b>Utente:</b></p>"
                     f"<p style='text-align: right; {human_style}'><i>{message.content}</i></p>",
                     unsafe_allow_html=True,
                 )
             else:  # Messaggi del chatbot
                 st.markdown(
-                    f"<p style='text-align: left;'><b>AI Assistente</b></p>"
+                    f"<p style='text-align: left;'><b>Assistente AI:</b></p>"
                     f"<p style='text-align: left; {chatbot_style}'><i>{message.content}</i></p>",
                     unsafe_allow_html=True,
                 )
@@ -270,7 +277,7 @@ def main():
     
     # Configura la pagina Streamlit prima di qualsiasi altro comando
     st.set_page_config(
-        page_title="GNA Assistente AI",
+        page_title="Assistente GNA",
         page_icon=":bust_in_silhouette:",
     )
     
@@ -285,11 +292,11 @@ def main():
         """
         You are a chatbot tasked with responding to questions about the WikiMedia user manual of the [Geoportale Nazionale dell’Archeologia (GNA)](https://gna.cultura.gov.it/wiki/index.php/Pagina_principale).
 
-        You should never answer a question with a question, and you should always respond with the most relevant user manual page.
+        You should never answer a question with a question, and you should always respond with the most relevant GNA user manual content.
 
         Do not answer questions that are not about the project.
 
-        Given a question, you should respond with the most relevant user manual page by following the relevant context below:\n
+        Given a question, you should respond with the most relevant user manual content by following the relevant context below:\n
         {context}
         """
     )
@@ -306,9 +313,9 @@ def main():
     
     # Configura Conversation Chain
     if "conversation" not in st.session_state:
-        model_name = "open-mistral-nemo"  # Imposta il nome del modello (es. 'mistral-7b')
+        model_name = "open-mistral-nemo"  
         st.session_state.conversation = get_conversation_chain(
-            st.session_state.vector_store, api_key, model_name
+            st.session_state.vector_store, api_key, model_name, system_message_prompt, human_message_prompt
         )
 
     # Configura cronologia chat
@@ -320,7 +327,7 @@ def main():
     st.markdown(
         """
         Questo assistente è stato creato per rispondere a domande sul manuale d'uso per il progetto [Geoportale Nazionale dell’Archeologia (GNA)](https://gna.cultura.gov.it/wiki/index.php/Pagina_principale).
-        Poni una domanda e l'assistente ti risponderà con la sezione più rilevante del manuale.
+        Poni una domanda e l'assistente ti risponderà con il contenuto più rilevante del manuale.
         """
     )
 
