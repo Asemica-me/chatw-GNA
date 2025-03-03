@@ -6,7 +6,7 @@ Your task is to assess Chatbot Answer responses based on four criteria:
 - **Fluency** (Is the response grammatically correct and natural?)  
 - **Completeness** (Does the Chatbot Answer return accurate and complete responses?)  
 
-Each criterion is rated on a scale from 1 (poor) to 5 (excellent). The following six examples showcase User Question queries and the corresponding Chatbot Answer responses, which have been manually annotated for evaluation purposes.
+Each criterion is rated on a scale from 1 (poor) to 5 (excellent). The following seven examples showcase User Question queries and the corresponding Chatbot Answer responses, which have been manually annotated for evaluation purposes.
 
 **Example 1:**  
 User Question: "Qual è lo scopo del progetto descritto nel manuale utente wiki del progetto GNA?"  
@@ -100,13 +100,13 @@ Chatbot Answer: "Il termine "RCG multipolygon" si riferisce al layer multipoligo
 
 **5th Prompt**
 User Question:"Quali sono le principali tecniche e metodi di indagine nel campo dell'archeologia?"
-Chatbot Answer: e principali tecniche e metodi di indagine nel campo dell'archeologia includono:
-•	Scavi archeologici: consiste nella rimozione di strati di terreno per esporre e studiare i resti archeologici sottostanti.
-•	Prospezione geofisica: utilizza tecniche come il georadar, la magnetometria e la resistenza elettrica per rilevare la presenza di strutture sotterranee senza scavare.
-•	Analisi dei reperti: consiste nell'analisi dei reperti archeologici, come ossa, ceramiche e metalli, per determinare la loro età, provenienza e utilizzo.
-•	Datazione al carbonio: una tecnica di datazione che utilizza il decadimento radioattivo del carbonio-14 per determinare l'età dei reperti organici.
-•	Analisi dei paesaggi: consiste nello studio dei paesaggi naturali e culturali per comprendere come sono stati utilizzati e modificati dalle popolazioni antiche.
-•	Analisi dei dati: consiste nell'analisi dei dati raccolti attraverso le tecniche di indagine per comprendere le relazioni tra i siti archeologici, le culture materiali e le pratiche sociali delle popolazioni antiche."
+Chatbot Answer: Le principali tecniche e metodi di indagine nel campo dell'archeologia includono:
+- Scavi archeologici: consiste nella rimozione di strati di terreno per esporre e studiare i resti archeologici sottostanti.
+- Prospezione geofisica: utilizza tecniche come il georadar, la magnetometria e la resistenza elettrica per rilevare la presenza di strutture sotterranee senza scavare.
+- Analisi dei reperti: consiste nell'analisi dei reperti archeologici, come ossa, ceramiche e metalli, per determinare la loro età, provenienza e utilizzo.
+- Datazione al carbonio: una tecnica di datazione che utilizza il decadimento radioattivo del carbonio-14 per determinare l'età dei reperti organici.
+- Analisi dei paesaggi: consiste nello studio dei paesaggi naturali e culturali per comprendere come sono stati utilizzati e modificati dalle popolazioni antiche.
+- Analisi dei dati: consiste nell'analisi dei dati raccolti attraverso le tecniche di indagine per comprendere le relazioni tra i siti archeologici, le culture materiali e le pratiche sociali delle popolazioni antiche."
 
 **6th Prompt**
 User Question: "Come si è evoluta la musica classica nel corso del XIX secolo?"
