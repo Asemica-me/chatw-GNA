@@ -1,77 +1,88 @@
-You are an expert in dialog system evaluation. Your task is to assess chatbot responses based on four criteria:  
-- **Coherence** (Does the response logically follow the conversation?)  
-- **Relevance** (Is the response appropriate and helpful to the user’s query?)  
-- **Fluency** (Is the response grammatically correct and natural?)  
-- **Precision and Recall** (Does the chatbot return accurate and complete responses?)  
+You are an expert in dialog system evaluation. 
 
-Rate each category from 1 (poor) to 5 (excellent).  
+Your task is to assess Chatbot Answer responses based on four criteria:  
+- **Consistency** (Does the response logically follow the conversation?)  
+- **Relevance** (Is the response appropriate and helpful to the User Question’s Question?)  
+- **Fluency** (Is the response grammatically correct and natural?)  
+- **Completeness** (Does the Chatbot Answer return accurate and complete responses?)  
+
+Each criterion is rated on a scale from 1 (poor) to 5 (excellent). The following six examples showcase User Question queries and the corresponding Chatbot Answer responses, which have been manually annotated for evaluation purposes.
 
 **Example 1:**  
-User: "Qual è lo scopo del progetto descritto nel manuale utente wiki del progetto GNA?"  
-Chatbot: "Lo scopo del progetto GNA, come descritto nel manuale utente wiki del progetto, è la creazione di una carta archeologica digitale del patrimonio archeologico italiano, liberamente consultabile da tutti gli utenti attraverso il web e facilmente implementabile nel tempo."  
-Coherence: 5  
+User Question: "Qual è lo scopo del progetto descritto nel manuale utente wiki del progetto GNA?"  
+Chatbot Answer: "Lo scopo del progetto GNA, come descritto nel manuale utente wiki del progetto, è la creazione di una carta archeologica digitale del patrimonio archeologico italiano, liberamente consultabile da tutti gli utenti attraverso il web e facilmente implementabile nel tempo."  
+Consistency: 5  
 Relevance: 5  
 Fluency: 5  
-Precision and Recall: 4 
+Completeness: 4 
 
 **Example 2:**  
-User: "Come compilare il layer MOSI? Spiegami la procedura nel dettaglio."  
-Chatbot: "Il MOSI (Metadati Operativi di Supporto all'Inventario) è un sistema utilizzato per la gestione dei beni culturali. La procedura per compilare il layer MOSI prevede l'inserimento di una geometria all'interno della scheda del MOPR (Metadati Operativi di Progetto). In questo modo, una serie di campi verranno automaticamente ereditati dalla scheda del progetto, ma saranno comunque modificabili.
+User Question: "Come compilare il layer MOSI? Spiegami la procedura nel dettaglio."  
+Chatbot Answer: "Il MOSI (Metadati Operativi di Supporto all'Inventario) è un sistema utilizzato per la gestione dei beni culturali. La procedura per compilare il layer MOSI prevede l'inserimento di una geometria all'interno della scheda del MOPR (Metadati Operativi di Progetto). In questo modo, una serie di campi verranno automaticamente ereditati dalla scheda del progetto, ma saranno comunque modificabili.
 I moduli sono organizzati in una serie di pagine navigabili attraverso i tab posti nella parte superiore della scheda. Il sistema gestisce l'inserimento di multigeometrie, quindi è possibile inserire MOSI puntuali (MOSI_multipoint), lineari (MOSI_multilinea) e areali (MOSI_multipolygon), che differiscono tra loro esclusivamente nel tipo di geometria.
 Alcuni campi, come il GPT (Tecnica di georeferenziazione), il GPM (Grado di precisione del posizionamento) e il GPBB (Base cartografica di riferimento), sono gestiti da un menu a tendina e permettono di descrivere le modalità con cui è stata effettuata la georeferenziazione, il livello di attendibilità della geometria inserita e la base cartografica utilizzata, rispettivamente.
 Inoltre, il sistema compila automaticamente i campi LCR (Regione) e LCP (Provincia) all'inserimento di una geometria nelle zone 12 e 24 miglia, mentre il campo LCC (Comune) viene valorizzato sempre con il termine "nd", poiché le fasce 12 e 24 miglia non riportano le suddivisioni amministrative. In caso sia possibile ricavare anche l'informazione della competenza a livello comunale, è possibile riportarla nel campo note GEN.
 In sintesi, la procedura per compilare il layer MOSI prevede l'inserimento di una geometria all'interno della scheda del MOPR, la compilazione automatica di alcuni campi e la possibilità di modificare i campi ereditati dalla scheda del progetto. Alcuni campi, come il GPT, il GPM e il GPBB, sono gestiti da un menu a tendina e permettono di descrivere le modalità di georeferenziazione, il livello di attendibilità della geometria e la base cartografica utilizzata, rispettivamente. Infine, il sistema compila automaticamente i campi LCR e LCP all'inserimento di una geometria nelle zone 12 e 24 miglia, mentre il campo LCC viene valorizzato sempre con il termine "nd"."  
-Coherence: 5  
+Consistency: 5  
 Relevance: 5  
 Fluency: 5  
-Precision and Recall: 5 
+Completeness: 5 
 
 **Example 3:**  
-User: "Cosa significa il termine "RCG multipolygon" nel contesto del manuale operativo?"  
-Chatbot: "MultiPolygon è una raccolta di zero o più istanze **Polygon** nei dati spaziali di SQL Server."  
-Coherence: 0 
-Relevance: 0  
-Fluency: 5  
-Precision and Recall: 0 
-
-**Example 4:**  
-User: "In che cosa consiste il progetto GNA?"  
-Chatbot: "Il Geoportale Nazionale per l'Archeologia (GNA) è un museo di storia dell'archeologia."  
-Coherence: 0 
+User Question: "Cosa significa il termine "RCG multipolygon" nel contesto del manuale operativo?"  
+Chatbot Answer: "MultiPolygon è una raccolta di zero o più istanze **Polygon** nei dati spaziali di SQL Server."  
+Consistency: 0 
 Relevance: 0  
 Fluency: 4  
-Precision and Recall: 0 
+Completeness: 0 
+
+**Example 4:**  
+User Question: "In che cosa consiste il progetto GNA?"  
+Chatbot Answer: "Il Geoportale Nazionale per l'Archeologia (GNA) è un museo di storia dell'archeologia."  
+Consistency: 0 
+Relevance: 0  
+Fluency: 4  
+Completeness: 0 
 
 **Example 5:**  
-User: "Che cosa contiene il manuale utente del GNA?"  
-Chatbot: "Il manuale utente del GNA contiene informazioni dettagliate relative alla struttura, alle caratteristiche e alle modalità di compilazione dei singoli campi della banca dati GNA, raccolte all'interno di tabelle. Inoltre, sono presenti indicazioni più generali relative al tipo di scelte progettuali effettuate, alla modalità di svolgimento di specifiche operazioni tecniche, a specifici casi d'uso, che possono guidare l'utente nella compilazione. Il manuale è accessibile online attraverso il link o direttamente attraverso il template."  
-Coherence: 5  
+User Question: "Che cosa contiene il manuale utente del GNA?"  
+Chatbot Answer: "Il manuale utente del GNA contiene informazioni dettagliate relative alla struttura, alle caratteristiche e alle modalità di compilazione dei singoli campi della banca dati GNA, raccolte all'interno di tabelle. Inoltre, sono presenti indicazioni più generali relative al tipo di scelte progettuali effettuate, alla modalità di svolgimento di specifiche operazioni tecniche, a specifici casi d'uso, che possono guidare l'utente nella compilazione. Il manuale è accessibile online attraverso il link o direttamente attraverso il template."  
+Consistency: 5  
+Relevance: 5  
+Fluency: 5
+Completeness: 4 
+
+**Example 6:**  
+User Question: "Quali sono le mostre d'arte attualmente in corso a Roma?"  
+Chatbot Answer: "Mi dispiace, ma non ho informazioni sulle mostre d'arte attualmente in corso a Roma. Posso aiutarti con informazioni sul Geoportale Nazionale dell'Archeologia (GNA) e il suo manuale utente. Quale altra domanda posso aiutarti a rispondere?"  
+Consistency: 5  
+Relevance: 0  
+Fluency: 5  
+Completeness: 5 
+
+**Example 7:**  
+User Question: "Quali informazioni si trovano nella pagina 'Istruzioni operative' del manuale utente del GNA?"  
+Chatbot Answer: "La pagina 'Istruzioni operative' del manuale utente del GNA fornisce informazioni sul flusso di lavoro per l'elaborazione della documentazione e il suo invio, nonché istruzioni specifiche per l'inserimento dei dati e la gestione dei dati di nuova acquisizione. La pagina include anche informazioni sulla verifica dell'assoggettabilità a VPIA e sulla compilazione dei layer del template GIS."
+Consistency: 5  
 Relevance: 5  
 Fluency: 5  
-Precision and Recall: 4 
+Completeness: 4 
 
-**Example 5:**  
-User: "Quali sono le principali tecniche e metodi di indagine nel campo dell'archeologia?"  
-Chatbot: "Le principali tecniche e metodi di indagine nel campo dell'archeologia includono:
--Scavi archeologici: consiste nella rimozione di strati di terreno per esporre e studiare i resti archeologici sottostanti.
--Prospezione geofisica: utilizza tecniche come il georadar, la magnetometria e la resistenza elettrica per rilevare la presenza di strutture sotterranee senza scavare.
--Analisi dei reperti: consiste nell'analisi dei reperti archeologici, come ossa, ceramiche e metalli, per determinare la loro età, provenienza e utilizzo.
--Datazione al carbonio: una tecnica di datazione che utilizza il decadimento radioattivo del carbonio-14 per determinare l'età dei reperti organici.
--Analisi dei paesaggi: consiste nello studio dei paesaggi naturali e culturali per comprendere come sono stati utilizzati e modificati dalle popolazioni antiche.
--Analisi dei dati: consiste nell'analisi dei dati raccolti attraverso le tecniche di indagine per comprendere le relazioni tra i siti archeologici, le culture materiali e le pratiche sociali delle popolazioni antiche."  
-Coherence: 5  
-Relevance: 2  
-Fluency: 5  
-Precision and Recall: 5 
+Consider this prompt template given as a contraint:
 
-Now, evaluate the following conversation:  
+Now, evaluate the Chatbot Answer responses in the following conversation:
 
-User: "Ciao, che cos'è il GNA?"  
-Chatbot: "Il Geoportale Nazionale dell'Archeologia (GNA) è un progetto del Ministero della Cultura, diretto da Elena Calandra e Carlo Birrozzi, che ha l'obiettivo di creare un sistema di informazioni archeologiche accessibile a tutti gli utenti. Il GNA utilizza il sistema di riferimento WGS84 per garantire la perfetta sovrapposizione con le cartografie di base più diffuse e utili nel disegno delle geometrie necessarie al progetto. I dati del GNA sono espressi in SR WGS84 geografico Lat Lon (EPSG:4326), mentre l'SR del progetto è WGS84 Pseudo Mercator per avere una sovrapposizione perfetta delle basi cartografiche, che sono espresse solo nel SR (EPSG:3857)."  
-User: "Come si compila il Modulo di Progetto (MOPR) secondo le linee guida del GNA?"  
-Chatbot: "Per compilare il Modulo di Progetto (MOPR) secondo le linee guida del GNA, è necessario seguire le istruzioni riportate nella pagina "Compilare il MOPR" del Wiki GNA. In particolare, si deve compilare la tabella presente nella pagina, inserendo i dati richiesti in ogni campo. Alcuni campi, come ad esempio il campo "CD", sono suddivisi in sottocampi, che devono essere compilati separatamente. È importante seguire le indicazioni riportate nella tabella per ogni campo, in modo da inserire i dati corretti e nel formato giusto. In caso di dubbi o incertezze, è possibile fare riferimento alle altre pagine del Wiki GNA o contattare l'amministratore del sistema."  
-User: "Come compilare il layer MOSI? Spiegami la procedura nel dettaglio."  
-Chatbot: "Per compilare il layer MOSI, è necessario seguire la seguente procedura:
+**1st prompt**
+User Question: "Ciao, che cos'è il GNA?"  
+Chatbot Answer: "Il Geoportale Nazionale dell'Archeologia (GNA) è un progetto del Ministero della Cultura, diretto da Elena Calandra e Carlo Birrozzi, che ha l'obiettivo di creare un sistema di informazioni archeologiche accessibile a tutti gli utenti. Il GNA utilizza il sistema di riferimento WGS84 per garantire la perfetta sovrapposizione con le cartografie di base più diffuse e utili nel disegno delle geometrie necessarie al progetto. I dati del GNA sono espressi in SR WGS84 geografico Lat Lon (EPSG:4326), mentre l'SR del progetto è WGS84 Pseudo Mercator per avere una sovrapposizione perfetta delle basi cartografiche, che sono espresse solo nel SR (EPSG:3857)."  
+
+**2nd Prompt**
+User Question: "Come si compila il Modulo di Progetto (MOPR) secondo le linee guida del GNA?"  
+Chatbot Answer: "Per compilare il Modulo di Progetto (MOPR) secondo le linee guida del GNA, è necessario seguire le istruzioni riportate nella pagina "Compilare il MOPR" del Wiki GNA. In particolare, si deve compilare la tabella presente nella pagina, inserendo i dati richiesti in ogni campo. Alcuni campi, come ad esempio il campo "CD", sono suddivisi in sottocampi, che devono essere compilati separatamente. È importante seguire le indicazioni riportate nella tabella per ogni campo, in modo da inserire i dati corretti e nel formato giusto. In caso di dubbi o incertezze, è possibile fare riferimento alle altre pagine del Wiki GNA o contattare l'amministratore del sistema."  
+
+**3rd Prompt**
+User Question: "Come compilare il layer MOSI? Spiegami la procedura nel dettaglio."
+Chatbot Answer: "Per compilare il layer MOSI, è necessario seguire la seguente procedura:
 Accedere alla scheda del progetto e selezionare il layer MOSI che si desidera compilare.
 Inserire la geometria del MOSI all'interno della scheda del progetto. La geometria può essere un punto, una linea o una poligono, a seconda del tipo di MOSI che si sta inserendo.
 Una volta inserita la geometria, il sistema compilerà automaticamente alcuni campi, come ad esempio il campo LCR (Regione), il campo LCP (Provincia) e il campo LCC (Comune), in base al layer ISTAT aggiornato all'anno in corso. In alcuni casi particolari, questi campi possono essere modificati attraverso un menu a tendina.
@@ -81,11 +92,29 @@ Compilare il campo GPM (Grado di precisione del posizionamento) scegliendo da un
 Compilare il campo GPBB (Base cartografica di riferimento) scegliendo da un menu a tendina la base cartografica utilizzata grazie a un sintetico vocabolario che accorpa per similitudine di scala.
 Infine, è possibile compilare i campi delle note generali (GEN) per aggiungere eventuali informazioni supplementari.
 È importante notare che i moduli sono organizzati in una serie di pagine navigabili attraverso i tab posti nella parte superiore della scheda. Inoltre, le geometrie vanno inserite dall'interno della scheda del MOPR, in modo che una serie di campi vengano automaticamente ereditati dalla scheda del progetto, ma saranno comunque modificabili."  
-User: "Cosa significa il termine "RCG multipolygon" nel contesto del manuale operativo?"  
-Chatbot: "Il termine "RCG multipolygon" si riferisce al layer multipoligonale destinato a raccogliere i dati generali della campagna di ricognizione realizzata per la redazione del documento di valutazione e strettamente legato al disegno delle geometrie di dettaglio del survey per la composizione della carta dell’uso del suolo. Il layer è anche funzionale all’uso come Authority file in SIGECweb nel caso si registrino informazioni sui materiali raccolti durante il survey con i moduli per l’inventariazione (MINP/MINV)."  
 
-Provide the ratings below:
-Coherence:  
+
+**4th Prompt**
+User Question: "Cosa significa il termine "RCG multipolygon" nel contesto del manuale operativo?"  
+Chatbot Answer: "Il termine "RCG multipolygon" si riferisce al layer multipoligonale destinato a raccogliere i dati generali della campagna di ricognizione realizzata per la redazione del documento di valutazione e strettamente legato al disegno delle geometrie di dettaglio del survey per la composizione della carta dell’uso del suolo. Il layer è anche funzionale all’uso come Authority file in SIGECweb nel caso si registrino informazioni sui materiali raccolti durante il survey con i moduli per l’inventariazione (MINP/MINV)."  
+
+**5th Prompt**
+User Question:"Quali sono le principali tecniche e metodi di indagine nel campo dell'archeologia?"
+Chatbot Answer: e principali tecniche e metodi di indagine nel campo dell'archeologia includono:
+•	Scavi archeologici: consiste nella rimozione di strati di terreno per esporre e studiare i resti archeologici sottostanti.
+•	Prospezione geofisica: utilizza tecniche come il georadar, la magnetometria e la resistenza elettrica per rilevare la presenza di strutture sotterranee senza scavare.
+•	Analisi dei reperti: consiste nell'analisi dei reperti archeologici, come ossa, ceramiche e metalli, per determinare la loro età, provenienza e utilizzo.
+•	Datazione al carbonio: una tecnica di datazione che utilizza il decadimento radioattivo del carbonio-14 per determinare l'età dei reperti organici.
+•	Analisi dei paesaggi: consiste nello studio dei paesaggi naturali e culturali per comprendere come sono stati utilizzati e modificati dalle popolazioni antiche.
+•	Analisi dei dati: consiste nell'analisi dei dati raccolti attraverso le tecniche di indagine per comprendere le relazioni tra i siti archeologici, le culture materiali e le pratiche sociali delle popolazioni antiche."
+
+**6th Prompt**
+User Question: "Come si è evoluta la musica classica nel corso del XIX secolo?"
+Chatbot Answer: "Mi dispiace, ma la mia conoscenza si basa sul manuale dell'utente del Geoportale Nazionale dell'Archeologia (GNA) e non sono in grado di rispondere a domande sulla storia della musica classica. Posso però fornirti informazioni sul GNA e sul suo utilizzo."
+
+Provide the ratings below and a brief comment on them.
+
+Consistency:  
 Relevance:  
 Fluency:  
-Precision and Recall:
+Completeness:
