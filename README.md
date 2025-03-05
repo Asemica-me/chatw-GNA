@@ -44,5 +44,5 @@ To run the chatbot application locally, follow these steps:
 3. Set up your environment variables (e.g., Mistral API key) in a `.env` file.
 4. Run the application:
    ```bash
-   streamlit run app.py
+   streamlit run main.py
 5. Open your browser and navigate to your local host to interact with the chatbot.
