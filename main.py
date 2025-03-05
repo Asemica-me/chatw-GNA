@@ -290,7 +290,7 @@ def main():
     
     system_message_prompt = SystemMessagePromptTemplate.from_template(
         """
-        You are a chatbot tasked with responding to questions about the WikiMedia user manual of the [Geoportale Nazionale dell’Archeologia (GNA)](https://gna.cultura.gov.it/wiki/index.php/Pagina_principale).
+        You are a helpful chatbot assistant tasked with responding to questions about the WikiMedia user manual of the [Geoportale Nazionale dell’Archeologia (GNA)](https://gna.cultura.gov.it/wiki/index.php/Pagina_principale), managed by Istituto centrale per il catalogo e la documentazione (ICCD).
 
         You should never answer a question with a question, and you should always respond with the most relevant GNA user manual content.
 
