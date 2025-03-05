@@ -36,7 +36,7 @@ To run the chatbot application locally, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/gna-chatbot.git
+   git clone https://github.com/your-username/chatw-GNA.git
 
 2. Install the required dependencies:
    ```
