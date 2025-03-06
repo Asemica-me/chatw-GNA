@@ -2,7 +2,7 @@
 
 ## 🌐 Overview
 
-This repository contains the code for a **Question-Answering (QnA) application** designed to enhance user interaction and knowledge accessibility on the **Geoportale Nazionale dell'Archeologia (GNA)** platform. The application leverages **Retrieval-Augmented Generation (RAG)** and **Natural Language Processing (NLP)** techniques to streamline user operations, ensuring precise and context-aware responses based on the platform’s documentation.
+This repository contains the code for a **Question-Answering (QnA) application** designed to enhance user interaction and knowledge accessibility in the context of the [**Geoportale Nazionale dell'Archeologia (GNA)**](https://gna.cultura.gov.it/progetto.html) project. The application integrates **Retrieval-Augmented Generation (RAG)** and **Natural Language Processing (NLP)** techniques to streamline user operations, ensuring precise and context-aware responses based on the platform’s [documentation](https://gna.cultura.gov.it/wiki/index.php/Pagina_principale).
 
 The system is built using the **LangChain framework**, integrated with **Mistral AI** and **FAISS vector store**, and operates through a **Streamlit interface**.
 
@@ -41,8 +41,10 @@ To run the chatbot application locally, follow these steps:
 2. Install the required dependencies:
    ```
    pip install -r requirements.txt
-3. Set up your environment variables (e.g., Mistral API key) in a `.env` file.
+3. Set up your environment variables:
+   - create a `.env` file in the root directory.
+   - Add your API keys and other necessary configurations.
 4. Run the application:
    ```bash
    streamlit run main.py
-5. Open your browser and navigate to your local host to interact with the chatbot.
+5. Open your browser and navigate to your local URL host to interact with the chatbot.
