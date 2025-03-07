@@ -13,7 +13,6 @@ def get_urls_from_sitemap_file(file_path: str) -> list:
         tree = ET.parse(file_path)
         root = tree.getroot()
         
-        # Handle namespaces in XML if present
         namespaces = {'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'}  # Namespace della sitemap
         
         # Extract URLs, accounting for the namespace
@@ -69,7 +68,7 @@ def extract_additional_sections(html: str) -> list:
     soup = BeautifulSoup(html, 'html.parser')
     sections = []
     
-    # Estrazione del testo dai tag <span> e <p>
+    # Estrazione del contenuto dai tag <span> e <p>
     for tag in soup.find_all(['span', 'p']):
         sections.append(tag.get_text(strip=True))
     
@@ -80,7 +79,7 @@ def create_dataset(file_path: str) -> pd.DataFrame:
     urls = get_urls_from_sitemap_file(file_path)
     if not urls:
         print("No URLs found in sitemap.")
-        return pd.DataFrame()  # Return empty DataFrame if no URLs found
+        return pd.DataFrame()  # Return empty DataFrame if no URLs was found
     
     for url in tqdm(urls, desc="URLs"):
         try:
@@ -90,7 +89,7 @@ def create_dataset(file_path: str) -> pd.DataFrame:
                 raise ValueError("No content extracted.")
             
             metadata = extract_metadata_with_bs4(html)
-            subtitles = metadata['subtitles']  # I sottotitoli estratti
+            subtitles = metadata['subtitles']  # sottotitoli estratti
             description = metadata['description']
             title = metadata['title']
             
@@ -102,7 +101,7 @@ def create_dataset(file_path: str) -> pd.DataFrame:
             # Estrazione delle altre sezioni dal contenuto HTML
             additional_sections = extract_additional_sections(html)
             
-            # Uniamo le sezioni aggiuntive con le sezioni esistenti senza sovrascrivere
+            # Unire le sezioni aggiuntive con le sezioni esistenti senza sovrascrivere
             sections.extend(additional_sections)
             
             # Aggiungi i dati alla lista
@@ -129,7 +128,7 @@ def create_dataset(file_path: str) -> pd.DataFrame:
     return df
 
 if __name__ == "__main__":
-    file_path = 'GNA_sitemap.xml'  # Path to your sitemap XML file
+    file_path = 'GNA_sitemap.xml'  # Path to the sitemap file
     df = create_dataset(file_path)
     if not df.empty:
         dataset_name = "./data/gna_kg_dataset.csv"
