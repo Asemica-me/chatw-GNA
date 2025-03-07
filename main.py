@@ -29,7 +29,7 @@ def load_dataset(dataset_name: str = "gna_kg_dataset_new.csv") -> pd.DataFrame:
     try:
         df = pd.read_csv(file_path)
         print(f"Dataset caricato con successo. Numero di righe: {len(df)}")
-        #print(f"Prime righe del dataset:\n{df.head()}")  # Aggiungi per vedere le prime righe
+        #print(f"Prime righe del dataset:\n{df.head()}")
         return df
     except Exception as e:
         print(f"Errore nel caricamento del dataset: {e}")
@@ -95,7 +95,7 @@ def create_chunks(dataset: pd.DataFrame, chunk_size: int, chunk_overlap: int):
         doc.page_content = final_content
         formatted_chunks.append(doc)
 
-        # # Debug: visualizzare il primo chunk
+        # # Debug per visualizzare il primo chunk
         # if i == 0:
         #     print(f"\nChunk {i + 1}:")
         #     print(f"Title: {title}")
@@ -119,7 +119,6 @@ def create_or_get_vector_store(chunks: list, api_key: str) -> FAISS:
     # Inizializza gli embeddings di Mistral
     mistral_embeddings = MistralAIEmbeddings(api_key=api_key, wait_time=3) #wait_time attesa per la creazione degli embeddings di mistral
 
-    # Verifica se il vector store esiste
     if not os.path.exists("./db"):
         os.makedirs("./db")
         print("Cartella ./db creata.")
@@ -179,10 +178,10 @@ def get_conversation_chain(vector_store, api_key: str, model_name: str, system_m
     """
     llm = create_mistral_llm(api_key, model_name)
     
-    # Configuriamo la memoria per la conversazione
+    # Configura la memoria per la conversazione
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-    # Creiamo la catena conversazionale con il recupero
+    # Crea la catena conversazionale con il recupero della chat
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
         retriever=vector_store.as_retriever(),
@@ -239,7 +238,7 @@ def handle_style_and_responses(user_question: str, mistral_llm) -> None:
         response = st.session_state.conversation.invoke({"question": user_question})
         st.session_state.chat_history = response.get("chat_history", [])
 
-        # Definizione degli stili
+        # Definizione degli stili di interfaccia web
         human_style = "background-color: #3f444f; border-radius: 10px; padding: 10px;"
         chatbot_style = "border-radius: 10px; padding: 10px;"
 
@@ -265,7 +264,7 @@ def handle_style_and_responses(user_question: str, mistral_llm) -> None:
     except Exception as e:
         # Logging degli errori
         st.error(f"Si è verificato un errore: {str(e)}")
-        print(f"Errore nella gestione della risposta: {e}")  # Debug dell'errore
+        print(f"Errore nella gestione della risposta: {e}")
 
 def main():
     # Carica le variabili di ambiente
@@ -349,7 +348,7 @@ def main():
         unsafe_allow_html=True
     )
 
-    # Input utente
+    # Input query utente
     user_question = st.text_input("Cosa vuoi chiedere?")
     if user_question:
         with st.spinner("Elaborando la risposta..."):
