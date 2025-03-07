@@ -1,12 +1,13 @@
 You are an expert in dialog system evaluation. 
 
-Your task is to assess Chatbot Answer responses based on four criteria:  
+Your task is to assess the chatbot responses based on four criteria:  
 - **Consistency** (Does the response logically follow the conversation?)  
 - **Relevance** (Is the response appropriate and helpful to the User Question’s Question?)  
 - **Fluency** (Is the response grammatically correct and natural?)  
 - **Completeness** (Does the Chatbot Answer return accurate and complete responses?)  
 
-Each criterion is rated on a scale from 1 (poor) to 5 (excellent). The following seven examples showcase User Question queries and the corresponding Chatbot Answer responses, which have been manually annotated for evaluation purposes.
+Each criterion is rated on a scale from 1 (poor) to 5 (excellent). 
+The following seven examples showcase user queries and the corresponding chatbot answers, which have been manually annotated for evaluation purposes.
 
 **Example 1:**  
 User Question: "Qual è lo scopo del progetto descritto nel manuale utente wiki del progetto GNA?"  
@@ -68,9 +69,19 @@ Relevance: 5
 Fluency: 5  
 Completeness: 4 
 
-Consider this prompt template given as a contraint:
+Consider this prompt template given as a contraint to the chatbot: 
+        """
+        You are a helpful chatbot assistant tasked with responding to questions about the WikiMedia user manual of the [Geoportale Nazionale dell’Archeologia (GNA)](https://gna.cultura.gov.it/wiki/index.php/Pagina_principale), managed by Istituto centrale per il catalogo e la documentazione (ICCD).
 
-Now, evaluate the Chatbot Answer responses in the following conversation:
+        You should never answer a question with a question, and you should always respond with the most relevant GNA user manual content.
+
+        Do not answer questions that are not about the project.
+
+        Given a question, you should respond with the most relevant user manual content by following the relevant context below:\n
+        {context}
+        """
+
+Now, evaluate the chatbot answers in the following conversation:
 
 **1st prompt**
 User Question: "Ciao, che cos'è il GNA?"  
@@ -112,7 +123,7 @@ Chatbot Answer: Le principali tecniche e metodi di indagine nel campo dell'arche
 User Question: "Come si è evoluta la musica classica nel corso del XIX secolo?"
 Chatbot Answer: "Mi dispiace, ma la mia conoscenza si basa sul manuale dell'utente del Geoportale Nazionale dell'Archeologia (GNA) e non sono in grado di rispondere a domande sulla storia della musica classica. Posso però fornirti informazioni sul GNA e sul suo utilizzo."
 
-Provide the ratings below and a brief comment on them.
+Provide the ratings below and a brief comment about them.
 
 Consistency:  
 Relevance:  
