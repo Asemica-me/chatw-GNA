@@ -1,4 +1,12 @@
-# AI-powered Chatbot for Geoportale Nazionale dell'Archeologia (GNA)
+# AI-powered Chatbot for Geoportale Nazionale Archeologia (GNA)
+
+
+A conversational AI assistant powered by Mistral AI and LangChain.
+
+ <img src="https://github.com/Asemica-me/chatw-GNA/blob/main/data/img.jpg?raw=true" width="800">
+
+[![Streamlit Cloud](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://gna-ai-assistant.streamlit.app/)
+
 
 ## 🌐 Overview
 
@@ -30,9 +38,15 @@ The application consists of the following components:
 - **Streamlit Interface**: Custom user interface for easy interaction with the chatbot.
 - **Multilingual Support**: Primarily in Italian with potential to expand.
 
+## 🚀 Deployment
+
+The application is already deployed and publicly accessible:  
+👉 **[Live Demo](https://gna-ai-assistant.streamlit.app/)** 👈
+
+
 ## ⚙️ Installation
 
-To run the chatbot application locally, follow these steps:
+To run the application locally, follow these steps:
 
 1. Clone the repository:
    ```bash
@@ -47,4 +61,5 @@ To run the chatbot application locally, follow these steps:
 4. Run the application:
    ```bash
    streamlit run main.py
-5. Open your browser and navigate to your local URL host to interact with the chatbot.
+5. Open your browser and navigate to your local URL host to interact with the chatbot.<br>
+   _The app will automatically open in your default browser._
