@@ -344,7 +344,7 @@ def main():
 
     # bordo arrotondato per l'immagine
     st.markdown(
-        '<img src="https://www.cxtoday.com/wp-content/uploads/2019/09/How-Do-Bots-Chatbots-Work.jpg" class="rounded-image" alt="Chatbot Assistance"/>', 
+        '<img src="https://github.com/Asemica-me/chatw-GNA/blob/main/data/img.jpg?raw=true" class="rounded-image" alt="Chatbot Assistance"/>', 
         unsafe_allow_html=True
     )
 
