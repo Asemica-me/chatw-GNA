@@ -1,8 +1,0 @@
-pypdf
-langchain
-langchain_community
-chromadb # Vector storage
-pytest
-boto3
-langchain-chroma
-tiktoken
